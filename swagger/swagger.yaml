@@ -1,0 +1,154 @@
+openapi: 3.0.0
+info:
+  title: Todo
+  description: API for Todo.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Local
+  - url: http://localhost:1234
+    description: Debug
+components:
+  schemas:
+    DueDate:
+      type: string
+      format: date-time
+      example: 2023-01-01T00:00:00.000+0000
+    Message:
+          type: string
+          example: Any string message
+    TodoId:
+      type: string
+      description: ID of the Todo
+      example: 64c56603303c32363715c7fd
+    LabelId:
+          type: string
+          description: ID of the label
+          example: 64c56603303c32363715c7fd
+    Todo:
+      properties:
+        id:
+          $ref: '#/components/schemas/TodoId'
+        dueDate:
+          $ref: '#/components/schemas/DueDate'
+        message:
+          $ref: '#/components/schemas/Message'
+        label:
+          $ref: '#/components/schemas/Label'
+    CreationalTodo:
+      properties:
+        dueDate:
+          required: true
+          $ref: '#/components/schemas/DueDate'
+        message:
+          required: true
+          $ref: '#/components/schemas/Message'
+        labelId:
+          required: true
+          $ref: '#/components/schemas/LabelId'
+    UpdateTodo:
+      properties:
+        dueDate:
+          $ref: '#/components/schemas/DueDate'
+        message:
+          $ref: '#/components/schemas/Message'
+        labelId:
+          $ref: '#/components/schemas/LabelId'
+    Label:
+      properties:
+        id:
+          $ref: '#/components/schemas/LabelId'
+        name:
+          type: string
+          example: Label name
+
+  responses:
+    Todo:
+      description: Todo
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Todo'
+    Label:
+      description: Label
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+                example: 64c56603303c32363715c7fd
+              name:
+                type: string
+                example: Label name
+
+paths:
+  /api/todos:
+    post:
+      summary: Create Todo
+      tags:
+        - Todo
+      requestBody:
+        required: true
+        description: CREATE
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/CreationalTodo'
+                - type: object
+      responses:
+        '201':
+          description: Created (no body)
+        '422':
+          description: Unprocessable Entity (no body)
+  /api/todos/{id}:
+    get:
+      summary: Get Todo
+      tags:
+        - Todo
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID
+      responses:
+        '200':
+          $ref: '#/components/responses/Todo'
+    patch:
+      summary: Edit Todo
+      tags:
+        - Todo
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTodo'
+      responses:
+        '200':
+          description: OK (no body)
+    delete:
+      summary: Delete Todo
+      tags:
+        - Todo
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID
+      responses:
+        '200':
+          description: No textual response
