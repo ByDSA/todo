@@ -1,6 +1,6 @@
 /* eslint-disable require-await */
 import { assertDefined } from "@app/utils";
-import UnprocessableEntityError from "@app/utils/models/repositories/errors/UnprocessableEntityError";
+import UnprocessableEntityError from "@app/utils/repositories/errors/UnprocessableEntityError";
 import { Label, LabelRepository } from "@modules/label";
 import Model, { CreationalModel, ID, assertIsCreationalModel, assertIsModel } from "../../models";
 import { UpdateModel } from "../../models/todo.model";
@@ -63,6 +63,15 @@ export default class MongoRepository implements Repository {
     return await this.#labelRepository.getOneById(id) ?? DEFAULT_LABEL;
   }
 
+  async #getOneLabelByIdOrFail(id: ID): Promise<Label> {
+    const found = await this.#labelRepository.getOneById(id);
+
+    if (!found)
+      throw new UnprocessableEntityError(`Label with id ${id} not found`);
+
+    return found;
+  }
+
   async createOne(creationalModel: CreationalModel): Promise<void> {
     try {
       assertIsCreationalModel(creationalModel);
@@ -70,7 +79,7 @@ export default class MongoRepository implements Repository {
       throwUnexpectedDataErrorFrom(e, creationalModel);
     }
 
-    const fixedLabel = await this.#getOneLabelByIdOrDefault(creationalModel.labelId);
+    const fixedLabel = await this.#getOneLabelByIdOrFail(creationalModel.labelId);
 
     try {
       await ModelODM.create( {
@@ -81,6 +90,30 @@ export default class MongoRepository implements Repository {
     } catch (e) {
       this.#errorHandler(e);
     }
+  }
+
+  async getAll(): Promise<Model[]> {
+    let found: ThisDocument[] = [];
+
+    try {
+      found = await ModelODM.find();
+    } catch (e) {
+      this.#errorHandler(e);
+    }
+
+    if (!found || found.length === 0)
+      return [];
+
+    const ret = found.map(async (item) => {
+      const label: Label = await this.#getOneLabelByIdOrDefault(item.labelId);
+      const todo: Model = documentToModel(item, label);
+
+      assertIsModel(todo);
+
+      return todo;
+    } );
+
+    return Promise.all(ret);
   }
 
   async updateOneById(id: ID, partial: UpdateModel): Promise<void> {
@@ -97,17 +130,25 @@ export default class MongoRepository implements Repository {
     };
 
     if (fixedPartial.labelId) {
-      const fixedLabel = await this.#getOneLabelByIdOrDefault(fixedPartial.labelId);
+      const fixedLabel = await this.#getOneLabelByIdOrFail(fixedPartial.labelId);
 
       fixedPartial.labelId = fixedLabel.id;
     }
 
-    const { modifiedCount } = await ModelODM.updateOne( {
-      _id: id,
-    }, fixedPartial);
+    try {
+      const exists = await ModelODM.exists( {
+        _id: id,
+      } );
 
-    if (modifiedCount === 0)
-      throw new ThisModelNotFoundError(id);
+      if (!exists)
+        throw new ThisModelNotFoundError(id);
+
+      await ModelODM.updateOne( {
+        _id: id,
+      }, fixedPartial);
+    } catch (e) {
+      this.#errorHandler(e);
+    }
   }
 
   async deleteOneById(id: ID): Promise<void> {

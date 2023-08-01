@@ -1,23 +1,27 @@
-import RealApp from "./main/RealApp";
-import { LabelCachingServiceReal } from "./modules/label";
+import ExpressApp from "./main/ExpressApp";
+import RealMongoDatabase from "./main/db/real-mongo.database";
+import { RealLabelCachingService } from "./modules/label";
 import { MongoRepository as LabelMongoRepository } from "./modules/label/repositories/mongo";
 import { MongoRepository as TodoMongoRepository } from "./modules/todo/repositories/mongo";
 
-const labelRepository = new LabelMongoRepository();
-const app = new RealApp( {
-  todo: {
-    repository: new TodoMongoRepository( {
-      labelRepository,
-    } ),
-  },
-  db: {
-    useDB: true,
-  },
-  label: {
-    cachingService: new LabelCachingServiceReal( {
-      repository: labelRepository,
-    } ),
-  },
-} );
+(async () => {
+  const labelRepository = new LabelMongoRepository();
+  const app = new ExpressApp( {
+    todo: {
+      repository: new TodoMongoRepository( {
+        labelRepository,
+      } ),
+    },
+    db: {
+      instance: new RealMongoDatabase(),
+    },
+    label: {
+      cachingService: new RealLabelCachingService( {
+        repository: labelRepository,
+      } ),
+    },
+  } );
 
-app.listen();
+  await app.init();
+  app.listen();
+} )();

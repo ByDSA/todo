@@ -1,5 +1,5 @@
-import { LabelKeys } from "@app/modules/label";
 import mongoose from "mongoose";
+import { LabelKeys } from "@app/modules/label";
 import Model, { Keys } from "../../models";
 
 interface ThisDocument extends Document {
@@ -9,7 +9,7 @@ interface ThisDocument extends Document {
   [Keys.LABEL_ID]: Model[Keys.LABEL][LabelKeys.ID];
 }
 
-const NAME = "TODO";
+const NAME = "todo";
 const schema = new mongoose.Schema( {
   dueDate: {
     type: Date,
@@ -27,7 +27,7 @@ const schema = new mongoose.Schema( {
   _id: true,
   autoIndex: false,
 } );
-const model = mongoose.model<ThisDocument>(NAME, schema);
+const model = mongoose.models[NAME] ?? mongoose.model<ThisDocument>(NAME, schema);
 
 export {
   model as ModelODM, schema as Schema, ThisDocument,

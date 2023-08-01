@@ -1,4 +1,4 @@
-import ModelNotFoundError from "@app/utils/models/repositories/errors/ModelNotFoundError";
+import ModelNotFoundError from "@app/utils/repositories/errors/ModelNotFoundError";
 import { ModelODM } from "./todo";
 
 export default class ThisModelNotFoundError extends ModelNotFoundError {

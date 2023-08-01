@@ -6,13 +6,9 @@ module.exports = {
   },
   testRegex: "(/__tests__/.*|(\\.|/)(test|spec))\\.tsx?$",
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
-  globals: {
-    "ts-jest": {
-      isolatedModules: false,
-    },
-  },
   moduleNameMapper: {
     "^@app/(.*)$": "<rootDir>/src/$1",
+    "^@tests/(.*)$": "<rootDir>/tests/$1",
     "^@modules/(.*)$": "<rootDir>/src/modules/$1",
   },
 };

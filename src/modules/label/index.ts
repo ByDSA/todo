@@ -3,7 +3,7 @@ export {
 } from "./models";
 
 export {
-  Repository as LabelRepository,
+  MongoRepository as LabelMongoRepository, Repository as LabelRepository,
 } from "./repositories";
 
 export {
@@ -13,5 +13,5 @@ export {
 
 export {
   CachingService as LabelCachingService,
-  CachingServiceReal as LabelCachingServiceReal,
+  RealCachingService as RealLabelCachingService,
 } from "./services";

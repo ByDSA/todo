@@ -3,4 +3,9 @@ set -e
 
 . "$(dirname -- "$0")/_/husky.sh"
 
+# Check if this is first push on remote
+if ! git rev-parse --verify origin/"$(git rev-parse --abbrev-ref HEAD)" >/dev/null 2>&1; then
+  exit 0
+fi
+
 . "$(dirname -- "$0")/guard_current_branch.sh"

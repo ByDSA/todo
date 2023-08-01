@@ -1,9 +1,11 @@
 
-import IRouter from "@app/utils/routers/IRouter";
 import cors from "cors";
 import express from "express";
+import IRouter from "@app/utils/routers/IRouter";
 import { Repository } from "./repositories";
 import TodoController from "./todo.controller";
+
+export const ENDPOINT_URL = "/api/v1/todos";
 
 type Dependencies = {
   repository: Repository;
@@ -25,6 +27,7 @@ export default class Router implements IRouter<express.Router> {
     } ));
     router.post("/", controller.createOne.bind(controller));
     router.get("/:id", controller.getOneById.bind(controller));
+    router.get("/", controller.getAll.bind(controller));
     router.patch("/:id", controller.updateOneById.bind(controller));
     router.delete("/:id", controller.deleteOneById.bind(controller));
 

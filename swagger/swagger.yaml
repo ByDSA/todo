@@ -13,7 +13,7 @@ components:
     DueDate:
       type: string
       format: date-time
-      example: 2023-01-01T00:00:00.000+0000
+      example: "2023-01-01T00:00:00.000Z"
     Message:
           type: string
           example: Any string message
@@ -24,7 +24,7 @@ components:
     LabelId:
           type: string
           description: ID of the label
-          example: 64c56603303c32363715c7fd
+          example: "0001"
     Todo:
       properties:
         id:
@@ -84,7 +84,7 @@ components:
                 example: Label name
 
 paths:
-  /api/todos:
+  /api/v1/todos:
     post:
       summary: Create Todo
       tags:
@@ -102,16 +102,29 @@ paths:
         '201':
           description: Created (no body)
         '422':
-          description: Unprocessable Entity (no body)
-  /api/todos/{id}:
+          description: Unprocessable Entity (no body). Invalid data provided (e.g. invalid label id)
     get:
-      summary: Get Todo
+      summary: Get all Todos
+      tags:
+        - Todo
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/responses/Todo'
+  /api/v1/todos/{id}:
+    get:
+      summary: Get one Todo
       tags:
         - Todo
       parameters:
         - name: id
           in: path
-          required: true
+          required: false
           schema:
             type: string
           description: ID
@@ -138,6 +151,8 @@ paths:
       responses:
         '200':
           description: OK (no body)
+        '422':
+          description: Unprocessable Entity (no body). Invalid data provided (e.g. invalid label id)
     delete:
       summary: Delete Todo
       tags:
@@ -152,3 +167,5 @@ paths:
       responses:
         '200':
           description: No textual response
+        '404':
+          description: Not Found (no body). Todo with given ID not found.

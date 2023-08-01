@@ -1,14 +1,13 @@
 /* eslint-disable require-await */
 import { assertDefined } from "@app/utils";
-import AlreadyExistsError from "@app/utils/models/repositories/errors/AlreadyExistsError";
-import NotFoundError from "@app/utils/models/repositories/errors/NotFoundError";
-import UnprocessableEntityError from "@app/utils/models/repositories/errors/UnprocessableEntityError";
+import NotFoundError from "@app/utils/repositories/errors/NotFoundError";
+import UnprocessableEntityError from "@app/utils/repositories/errors/UnprocessableEntityError";
 import { Label, LabelID } from "@modules/label";
-import Model, { CreationalModel, ID, assertIsCreationalModel } from "../models";
+import { CreationalModel, ID, assertIsCreationalModel } from "../models";
 import { UpdateModel } from "../models/todo.model";
 import Repository from "../repositories/Repository";
 
-export const TodoValues: {[key: ID]: {
+const TodoValues: {[key: ID]: {
   id: ID;
   dueDate: Date;
   message: string;
@@ -29,7 +28,7 @@ const LabelValues: {[key: LabelID]: Label} = {
 };
 
 export default class MockRepository implements Repository {
-  async getOneById(id: ID): Promise<Model> {
+  getOneById = jest.fn((id: ID) => {
     const found = TodoValues[id];
 
     if (!found)
@@ -43,9 +42,20 @@ export default class MockRepository implements Repository {
     };
 
     return Promise.resolve(ret);
-  }
+  } );
 
-  async createOne(creationalModel: CreationalModel): Promise<void> {
+  getAll = jest.fn(() => {
+    const ret = Object.values(TodoValues).map((found) => ( {
+      id: found.id,
+      dueDate: found.dueDate,
+      message: found.message,
+      label: LabelValues[found.labelId],
+    } ));
+
+    return Promise.resolve(ret);
+  } );
+
+  createOne = jest.fn((creationalModel: CreationalModel) => {
     try {
       assertIsCreationalModel(creationalModel);
     } catch (e) {
@@ -67,11 +77,39 @@ export default class MockRepository implements Repository {
 
     TodoValues[id] = {
       id,
-      dueDate: creationalModel.dueDate,
+      dueDate: new Date(creationalModel.dueDate),
       message: creationalModel.message,
       labelId: creationalModel.labelId,
     };
-  }
+
+    return Promise.resolve();
+  } );
+
+  updateOneById = jest.fn((id: ID, partial: UpdateModel) => {
+    assertDefined(id);
+    assertDefined(partial);
+
+    this.#assertModelExists(id);
+
+    TodoValues[id] = {
+      id,
+      dueDate: partial.dueDate ? new Date(partial.dueDate) : TodoValues[id].dueDate,
+      message: partial.message ?? TodoValues[id].message,
+      labelId: partial.labelId ?? TodoValues[id].labelId,
+    };
+
+    return Promise.resolve();
+  } );
+
+  deleteOneById = jest.fn((id: ID) => {
+    assertDefined(id);
+
+    this.#assertModelExists(id);
+
+    delete TodoValues[id];
+
+    return Promise.resolve();
+  } );
 
   #modelExists(id: ID): boolean {
     return !!TodoValues[id];
@@ -80,32 +118,5 @@ export default class MockRepository implements Repository {
   #assertModelExists(id: ID): void {
     if (!this.#modelExists(id))
       throw new NotFoundError(`id ${id} not found`);
-  }
-
-  #assertModelDoesNotExist(id: ID): void {
-    if (this.#modelExists(id))
-      throw new AlreadyExistsError(`id ${id} already exists`);
-  }
-
-  async updateOneById(id: ID, partial: UpdateModel): Promise<void> {
-    assertDefined(id);
-    assertDefined(partial);
-
-    this.#assertModelExists(id);
-
-    TodoValues[id] = {
-      id,
-      dueDate: partial.dueDate ?? TodoValues[id].dueDate,
-      message: partial.message ?? TodoValues[id].message,
-      labelId: partial.labelId ?? TodoValues[id].labelId,
-    };
-  }
-
-  async deleteOneById(id: ID): Promise<void> {
-    assertDefined(id);
-
-    this.#assertModelExists(id);
-
-    delete TodoValues[id];
   }
 }

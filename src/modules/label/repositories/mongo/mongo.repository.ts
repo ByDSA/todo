@@ -1,7 +1,7 @@
 /* eslint-disable require-await */
 import { assertDefined } from "@app/utils";
-import NotFoundError from "@app/utils/models/repositories/errors/NotFoundError";
-import UnprocessableEntityError from "@app/utils/models/repositories/errors/UnprocessableEntityError";
+import NotFoundError from "@app/utils/repositories/errors/NotFoundError";
+import UnprocessableEntityError from "@app/utils/repositories/errors/UnprocessableEntityError";
 import Model, { CreationalModel, ID, assertIsCreationalModel, assertIsModel } from "../../models";
 import Repository from "../Repository";
 import { ModelODM } from "./label";
@@ -63,27 +63,5 @@ export default class MongoDBRepository implements Repository {
   async #assertModelExists(id: ID) {
     if (!await this.#modelExists(id))
       throw new NotFoundError(`id ${id} not found`);
-  }
-
-  async updateOneById(id: ID, partial: Partial<Model>): Promise<void> {
-    assertDefined(id);
-    assertDefined(partial);
-
-    await this.#assertModelExists(id);
-
-    // values[id] = {
-    //   id,
-    //   dueDate: partial.dueDate ?? values[id].dueDate,
-    //   message: partial.message ?? values[id].message,
-    //   label: partial.label ?? values[id].label,
-    // };
-  }
-
-  async deleteOneById(id: ID): Promise<void> {
-    assertDefined(id);
-
-    await this.#assertModelExists(id);
-
-    // delete values[id];
   }
 }

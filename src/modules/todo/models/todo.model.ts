@@ -19,8 +19,9 @@ type Model = {
 export default Model;
 type ID = Model[Keys.ID];
 
-type CreationalModel = Omit<Model, Keys.ID | Keys.LABEL> & {
+type CreationalModel = Omit<Model, Keys.DUE_DATE | Keys.ID | Keys.LABEL> & {
   [Keys.LABEL_ID]: Label[LabelKeys.ID];
+  [Keys.DUE_DATE]: string;
 };
 
 type UpdateModel = Partial<CreationalModel>;

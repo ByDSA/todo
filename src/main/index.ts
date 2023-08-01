@@ -1,6 +1,6 @@
 /* eslint-disable import/prefer-default-export */
-import RealApp from "./RealApp";
+import ExpressApp from "./ExpressApp";
 
 export {
-  RealApp as App,
+  ExpressApp,
 };

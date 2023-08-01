@@ -1,4 +1,4 @@
 export default interface CachingService {
-  initCron(): void;
+  init(): void;
   updateCache(): Promise<boolean>;
 }

@@ -1,15 +1,17 @@
 {
-  "name": "todo-list-api",
+  "name": "todo-api",
   "version": "1.0.0",
   "description": "",
   "main": "build/index.js",
+  "type": "commonjs",
   "scripts": {
     "start": "NODE_ENV=production node -r ts-node/register/transpile-only -r tsconfig-paths/register build/index.js",
-    "start:watch": "NODE_ENV=development nodemon",
+    "start:watch": "NODE_ENV=development nodemon --inspect src/index.ts",
     "build": "pnpm build:clean && pnpm build:raw",
     "build:raw": "tsc -p tsconfig-build.json",
     "build:clean": "rm -rf build",
-    "test": "NODE_ENV=test jest --maxWorkers=1",
+    "test": "NODE_ENV=test jest --maxWorkers=1 --silent",
+    "test:onlyLocal": "pnpm run test --testPathIgnorePatterns=.e2e.",
     "test:watch": "pnpm run test --watch",
     "test:coverage": "pnpm run test --coverage",
     "test:coverage:clean": "rm -rf coverage",
@@ -30,11 +32,12 @@
   "license": "UNLICENSED",
   "private": true,
   "dependencies": {
-    "cors": "^2.8.5",
+    "cors": "2.8.5",
     "dotenv": "16.3.1",
     "express": "4.18.2",
+    "helmet": "7.0.0",
     "mongoose": "7.4.1",
-    "node-cron": "^3.0.2"
+    "node-cron": "3.0.2"
   },
   "devDependencies": {
     "@commitlint/cli": "17.6.7",

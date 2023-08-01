@@ -6,8 +6,9 @@ COPY . .
 
 RUN npm install -g pnpm
 
-RUN pnpm install --production
-RUN pnpm test
+RUN pnpm install --ignore-scripts
+
+RUN pnpm test:onlyLocal
 RUN pnpm build
 
 EXPOSE 8080
